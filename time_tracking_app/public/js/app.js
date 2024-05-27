@@ -1,21 +1,17 @@
 class TimersDashboard extends React.Component {
   state = {
-    timers: [
-      {
-        title: 'Learn Algorithms',
-        project: 'Programming mastery',
-        id: uuid.v4(),
-        elapsed: 5430020,
-        runningSince: Date.now()
-      },
-      {
-        title: "Learn .NET",
-        project: "App Domination",
-        id: uuid.v4(),
-        elapsed: 4903201,
-        runningSince: null
-      }
-    ]
+    timers: []
+  }
+
+  componentDidMount() {
+    this.loadTimersFromServer()
+    setInterval(this.loadTimersFromServer, 5000)
+  }
+
+  loadTimersFromServer = () => {
+    client.getTimers((serverTimers) => (
+      this.setState({timers: serverTimers})
+    ))
   }
 
   handleCreateFormSubmit = (timer) => {
@@ -39,6 +35,7 @@ class TimersDashboard extends React.Component {
         }
       })
     })
+    client.updateTimer(attrs)
   }
 
   createTimer = (timer) => {
@@ -46,6 +43,7 @@ class TimersDashboard extends React.Component {
     this.setState({
       timers: this.state.timers.concat(t)
     })
+    client.createTimer(t)
   }
 
   handleTrashClick = (timerId) => {
@@ -56,6 +54,7 @@ class TimersDashboard extends React.Component {
     this.setState({
       timers: this.state.timers.filter(t => t.id !== timerId)
     })
+    client.deleteTimer({id:timerId})
   }
   handleStartClick = (timerId) => {
     this.startTimer(timerId)
@@ -78,6 +77,8 @@ class TimersDashboard extends React.Component {
         }
       })
     })
+
+  client.startTimer({id:timerId, start:now})
   }
 
   stopTimer = (timerId) => {
@@ -96,6 +97,7 @@ class TimersDashboard extends React.Component {
         }
       })
     })
+    client.stopTimer({id:timerId, stop:now})
   }
   render() {
     return (
